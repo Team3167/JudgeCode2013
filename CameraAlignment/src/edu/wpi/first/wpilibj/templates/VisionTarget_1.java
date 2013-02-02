@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.image.ParticleAnalysisReport;
  *
  * @author Ryan Young
  */
-public class VisionTarget
+public class VisionTarget_1
 {
 
   private static final double FRC_PARTICLE_TO_IMAGE_PERCENT = .0001;
@@ -26,7 +26,7 @@ public class VisionTarget
   final ParticleAnalysisReport firstParticle;
   //final ParticleAnalysisReport secondParticle;
 
-  VisionTarget(ParticleAnalysisReport firstParticle)
+  VisionTarget_1(ParticleAnalysisReport firstParticle)
   {
     this.firstParticle = firstParticle;
   }
@@ -127,14 +127,14 @@ public class VisionTarget
     int numberOfParticles = firstColor.getNumberParticles();
     int halfTheParticles = numberOfParticles / 2;
 
-    //ParticleAnalysisReport[] firstColorHits = new ParticleAnalysisReport[numberOfParticles];
+    ParticleAnalysisReport[] firstColorHits = new ParticleAnalysisReport[halfTheParticles];
 
-   // for (int i = 0; i < halfTheParticles; i++)
-    //{
-      //firstColorHits[i] = firstColor.getParticleAnalysisReport(i);
-    //}
+    for (int i = 0; i < halfTheParticles; i++)
+    {
+      firstColorHits[i] = firstColor.getParticleAnalysisReport(i);
+    }
 
-    ParticleAnalysisReport[] firstColorHits = firstColor.getOrderedParticleAnalysisReports(3);
+    //ParticleAnalysisReport[] firstColorHits = firstColor.getOrderedParticleAnalysisReports(3);
     //ParticleAnalysisReport[] secondColorHits = secondColor.getOrderedParticleAnalysisReports(3);
     firstColor.free();
     //secondColor.free();
@@ -142,22 +142,22 @@ public class VisionTarget
     for (int i = 0; i < firstColorHits.length; i++)
     {
       ParticleAnalysisReport firstTrackReport = firstColorHits[i];
-      //ParticleAnalysisReport secondTrackReport = secondColorHits[i]
+      //ParticleAnalysisReport secondTrackReport = secondColorHits[i];
+      if (firstTrackReport.particleToImagePercent < FRC_PARTICLE_TO_IMAGE_PERCENT)
+      {
+        break;
+      }
 
-	    if (firstTrackReport.particleToImagePercent < FRC_PARTICLE_TO_IMAGE_PERCENT)
-        {
-          break;
-        }
-
-        VisionTarget target = new VisionTarget(firstTrackReport);
+      VisionTarget target = new VisionTarget(firstTrackReport);
 
       //firstTrackReport.center_mass_y >= -.1 && firstTrackReport.center_mass_y <= .1  possible alternate filter
-        if ((target.getSize()) >= 1.0)
-        {
+      if ((target.getSize()) >= 1.0)
+      {
         // add in the SizesRelative call if needed -
         // so far it does not seem necessary
-          return target;
-        }
+        return target;
+      }
+
     }
 
     return null;

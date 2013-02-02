@@ -16,43 +16,53 @@ import edu.wpi.first.wpilibj.image.NIVisionException;
  */
 public class BarTracker
 {
-   VisionTarget.Threshold firstColor = new VisionTarget.Threshold(0, 240, 140, 255, 100, 230);
-   VisionTarget.Threshold secondColor = new VisionTarget.Threshold(115, 240, 140, 255, 100, 230);
-   AxisCamera camera = AxisCamera.getInstance();
 
-   public BarTracker()
-   {
+  VisionTarget.Threshold firstColor = new VisionTarget.Threshold(0, 240, 140, 255, 100, 230);
+  VisionTarget.Threshold secondColor = new VisionTarget.Threshold(115, 240, 140, 255, 100, 230);
+  AxisCamera camera = AxisCamera.getInstance();
 
-   }
+  public BarTracker()
+  {
+  }
 
-    public void setFirstColorThresholds(int lowerHue, int upperHue,
-            int lowerSaturation, int upperSaturation,
-            int lowerLuminance, int upperLuminance)
+  public void setFirstColorThresholds(int lowerHue, int upperHue,
+                                      int lowerSaturation, int upperSaturation,
+                                      int lowerLuminance, int upperLuminance)
+  {
+    firstColor = new VisionTarget.Threshold(lowerHue, upperHue,
+                                            lowerSaturation, upperSaturation,
+                                            lowerLuminance, upperLuminance);
+  }
+
+  public VisionTarget[] getTarget() throws NIVisionException, AxisCameraException
+  {
+    while (true)
     {
-          firstColor = new VisionTarget.Threshold(lowerHue, upperHue,
-                lowerSaturation, upperSaturation,
-                lowerLuminance, upperLuminance);
-    }
-
-	public VisionTarget[] getTarget() throws NIVisionException, AxisCameraException {
-        while (true) {
-            ColorImage image = camera.getImage();
-            try {
-                VisionTarget targetOne = VisionTarget.findFirstTarget(image,firstColor);
-				VisionTarget targetTwo = VisionTarget.findSecondTarget(image, secondColor, targetOne);
-				VisionTarget[] targets = new VisionTarget[2];
-				targets[0] = targetOne;
-				targets[1] = targetTwo;
-				return targets;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (image != null) {
-                    image.free();
-                }
-                image = null;
-            }
-            Timer.delay(.001);
+      ColorImage image = camera.getImage();
+      try
+      {
+        VisionTarget targetOne = VisionTarget.findFirstTarget(image, firstColor);
+        //VisionTarget targetTwo = VisionTarget.findSecondTarget(image, secondColor);
+        VisionTarget[] targets = new VisionTarget[2];
+        targets[0] = targetOne;
+        //targets[1] = targetTwo;
+        return targets;
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+      finally
+      {
+        if (image != null)
+        {
+          image.free();
         }
+        image = null;
+      }
+      Timer.delay(.001);
     }
+    // While loop ends when an array of targets is found and returned.
+
+  }
 }
