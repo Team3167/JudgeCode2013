@@ -18,7 +18,6 @@ public class BarTracker
 {
 
   VisionTarget.Threshold firstColor = new VisionTarget.Threshold(0, 240, 140, 255, 100, 230);
-  VisionTarget.Threshold secondColor = new VisionTarget.Threshold(115, 240, 140, 255, 100, 230);
   AxisCamera camera = AxisCamera.getInstance();
 
   public BarTracker()
@@ -41,11 +40,7 @@ public class BarTracker
       ColorImage image = camera.getImage();
       try
       {
-        VisionTarget targetOne = VisionTarget.findFirstTarget(image, firstColor);
-        VisionTarget targetTwo = VisionTarget.findSecondTarget(image, secondColor);
-        VisionTarget[] targets = new VisionTarget[2];
-        targets[0] = targetOne;
-        targets[1] = targetTwo;
+        VisionTarget[] targets = VisionTarget.findTargets(image, firstColor);
         return targets;
       }
       catch (Exception e)

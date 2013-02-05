@@ -42,8 +42,7 @@ public class VisionTarget
    * Position(right_val); public static final Position left = new
    * Position(left_val);
    *
-   * private Position(int value) { this.value = value; }
-	}
+   * private Position(int value) { this.value = value; } }
    */
   public static class Threshold
   {
@@ -112,9 +111,11 @@ public class VisionTarget
    * @return A Target object containing information about the target or null if
    * no target was found.
    */
-  public static VisionTarget findFirstTarget(ColorImage image,
-                                             Threshold firstThreshold) throws NIVisionException
+  public static VisionTarget[] findTargets(ColorImage image,
+                                           Threshold firstThreshold) throws NIVisionException
   {
+
+
     BinaryImage firstColor = image.thresholdHSL(
             firstThreshold.plane1Low, firstThreshold.plane1High,
             firstThreshold.plane2Low, firstThreshold.plane2High,
@@ -125,24 +126,21 @@ public class VisionTarget
     //firstThreshold.plane3Low, firstThreshold.plane3High);
 
     int numberOfParticles = firstColor.getNumberParticles();
-    int halfTheParticles = numberOfParticles / 2;
 
-    ParticleAnalysisReport[] firstColorHits = new ParticleAnalysisReport[halfTheParticles];
+    ParticleAnalysisReport[] firstColorHits = new ParticleAnalysisReport[numberOfParticles];
+    VisionTarget[] targets = new VisionTarget[numberOfParticles];
 
-    for (int i = 0; i < halfTheParticles; i++)
+    for (int i = 0; i < numberOfParticles; i++)
     {
       firstColorHits[i] = firstColor.getParticleAnalysisReport(i);
     }
 
     //ParticleAnalysisReport[] firstColorHits = firstColor.getOrderedParticleAnalysisReports(3);
-    //ParticleAnalysisReport[] secondColorHits = secondColor.getOrderedParticleAnalysisReports(3);
     firstColor.free();
-    //secondColor.free();
 
     for (int i = 0; i < firstColorHits.length; i++)
     {
       ParticleAnalysisReport firstTrackReport = firstColorHits[i];
-      //ParticleAnalysisReport secondTrackReport = secondColorHits[i];
       if (firstTrackReport.particleToImagePercent < FRC_PARTICLE_TO_IMAGE_PERCENT)
       {
         break;
@@ -150,55 +148,22 @@ public class VisionTarget
 
       VisionTarget target = new VisionTarget(firstTrackReport);
 
-      //firstTrackReport.center_mass_y >= -.1 && firstTrackReport.center_mass_y <= .1  possible alternate filter
+      
       if ((target.getSize()) >= 1.0)
       {
-        // add in the SizesRelative call if needed -
-        // so far it does not seem necessary
-        return target;
+
+        targets[i] = target;
+      }
+      else
+      {
+        targets[i] = null;
       }
 
     }
 
-    return null;
+    return targets;
   }
 
-  public static VisionTarget findSecondTarget(ColorImage image,
-                                              Threshold firstThreshold) throws NIVisionException
-  {
-
-    BinaryImage secondColor = image.thresholdHSL(
-            firstThreshold.plane1Low, firstThreshold.plane1High,
-            firstThreshold.plane2Low, firstThreshold.plane2High,
-            firstThreshold.plane3Low, firstThreshold.plane3High);
-
-    int numberOfParticles = secondColor.getNumberParticles();
-    int halfTheParticles = numberOfParticles / 2;
-    int theOtherHalf = numberOfParticles - halfTheParticles;
-
-    ParticleAnalysisReport[] secondColorHits = new ParticleAnalysisReport[theOtherHalf];
-    secondColor.free();
-
-    for (int i = 0; i < secondColorHits.length; i++)
-    {
-      ParticleAnalysisReport secondTrackReport = secondColorHits[i];
-      if (secondTrackReport.particleToImagePercent < FRC_PARTICLE_TO_IMAGE_PERCENT)
-      {
-        break;
-      }
-
-      VisionTarget target = new VisionTarget(secondTrackReport);
-
-
-      if ((target.getSize()) >= 1.0)
-      {
-        return target;
-      }
-
-    }
-
-    return null;
-  }
 
   //public double getX1Position
   public double getXPosition()

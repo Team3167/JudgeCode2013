@@ -21,7 +21,7 @@ public class Alligner
   {
 
     BarTracker tracker = new BarTracker();
-    int i = 0;
+    int i = 1;
     boolean done = false;
 
     while (!done)
@@ -29,26 +29,28 @@ public class Alligner
       try
       {
         VisionTarget[] targets = tracker.getTarget();
-        VisionTarget target = targets[i];
-        if (target != null)
+        VisionTarget target1 = targets[i - 1];
+        VisionTarget target2 = targets[i];
+        
+        if (target1 != null && target2 != null)
         {
-          System.out.println("Target " + i + ": " + target.toString());
-          if ((target.getXPosition() > -.01 && target.getXPosition() < .01))
+          System.out.println("Target " + (i - 1) + ": " + target1.toString());
+          System.out.println("Target " + i + ": " + target2.toString());
+          double posX = xMidpoint(target1, target2);
+          if ((posX > -.01 && posX < .01))
           {
             System.out.println("Target is in the Center!!!");
             System.out.println("Servo moved: "+ servo.getAngleMoved());
             if(i == targets.length)
             {
               done = true;
-            }
-            i ++;
-            
+            }            
           }
-          else if (target.getXPosition() > 0)
+          else if (posX < 0)
           {
             servo.incrementLeft();
           }
-          else if (target.getXPosition() < 0)
+          else if (posX > 0)
           {
             servo.incrementRight();
           }
@@ -57,6 +59,7 @@ public class Alligner
         {
           System.out.println("No Target Found");
         }
+        i ++;
       }
       catch (Exception e)
       {
@@ -65,5 +68,13 @@ public class Alligner
 
     }
 
+  }
+  
+  private double xMidpoint(VisionTarget t1, VisionTarget t2)
+  {
+    double x1 = t1.getXPosition();
+    double x2 = t2.getXPosition();
+    double midpoint = (x1 + x2)/2;
+    return midpoint;
   }
 }
