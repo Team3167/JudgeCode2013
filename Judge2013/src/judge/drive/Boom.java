@@ -46,4 +46,10 @@ public class Boom
 	{
 		cmd = -speed;
 	}
+
+	public boolean IsExtended()
+	{
+		// FIXME:  Implement
+		return false;
+	}
 }

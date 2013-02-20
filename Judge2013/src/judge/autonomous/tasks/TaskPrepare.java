@@ -53,7 +53,7 @@ public class TaskPrepare extends TaskBase
 
 	protected boolean IsComplete()
 	{
-		return boom.IsExtended && leadscrew.IsHomed();// TODO:  Any sensors for hook extension?
+		return boom.IsExtended() && leadscrew.IsHomed();// TODO:  Any sensors for hook extension?
 	}
 
 	/**
