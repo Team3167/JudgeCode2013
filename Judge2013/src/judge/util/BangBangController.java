@@ -27,6 +27,8 @@ public class BangBangController
 	private final double tolerance;
 	private final boolean reverseCmd;
 
+	private double speed = 1.0;
+
 	// Methods
 	/**
 	 * Constructor for driving a Relay object.
@@ -68,6 +70,11 @@ public class BangBangController
 		reverseCmd = _reverseCmd;
 	}
 
+	public void SetSpeed(double speed)
+	{
+		this.speed = speed;
+	}
+
 	/**
 	 * Method for closing the control loop.
 	 *
@@ -80,30 +87,46 @@ public class BangBangController
 		if (relay != null)
 		{
 			if (cmd - act > tolerance)
+			{
 				relay.set(Relay.Value.kForward);
+			}
 			else if (cmd - act < -tolerance)
+			{
 				relay.set(Relay.Value.kReverse);
+			}
 			else
+			{
 				relay.set(Relay.Value.kOff);
+			}
 		}
 		else
 		{
 			if (cmd - act > tolerance)
 			{
 				if (reverseCmd)
-					jag.set(-1.0);
+				{
+					jag.set(-speed);
+				}
 				else
-					jag.set(1.0);
+				{
+					jag.set(speed);
+				}
 			}
 			else if (cmd - act < -tolerance)
 			{
 				if (reverseCmd)
-					jag.set(1.0);
+				{
+					jag.set(speed);
+				}
 				else
-					jag.set(-1.0);
+				{
+					jag.set(-speed);
+				}
 			}
 			else
+			{
 				jag.set(0.0);
+			}
 		}
 	}
 }

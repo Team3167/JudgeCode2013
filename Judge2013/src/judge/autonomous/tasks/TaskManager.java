@@ -72,13 +72,19 @@ public class TaskManager
 					// If we have another task to do, make it the current task,
 					// otherwise we make the current task null
 					if (taskQueue.Size() > 0)
+					{
 						currentTask = taskQueue.Pop();
+					}
 					else
+					{
 						currentTask = null;
+					}
 				}
 			}
 			else if (taskQueue.Size() > 0)
+			{
 				currentTask = taskQueue.Pop();
+			}
 		}
 		catch (Exception ex)
 		{
@@ -95,9 +101,11 @@ public class TaskManager
 	public String GetCurrentTaskName()
 	{
 		if (currentTask == null)
+		{
 			// Names should be 21 characters long
             return "None                 ";
-        
+		}
+
 		return currentTask.GetName();
 	}
 
@@ -109,7 +117,9 @@ public class TaskManager
 	public String GetCurrentTaskState()
 	{
 		if (currentTask == null)
+		{
 			return "                     ";
+		}
 
 		return currentTask.GetStateName();
 	}
@@ -150,7 +160,9 @@ public class TaskManager
         // If we are doing a task or are about to do a task,
         // return true
         if (taskQueue.Size() > 0 || currentTask != null)
+		{
             return true;
+		}
 
         return false;
     }
@@ -163,7 +175,9 @@ public class TaskManager
 	public boolean OkToDrive()
 	{
 		if (currentTask == null)
+		{
 			return true;
+		}
 
 		return currentTask.OkToDrive();
 	}

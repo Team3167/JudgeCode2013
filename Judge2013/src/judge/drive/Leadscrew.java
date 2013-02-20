@@ -119,9 +119,13 @@ public class Leadscrew
 	public final void Reset()
 	{
 		if (homeSwitch.get())
+		{
 			nextState = driveOffOfSwitch;
+		}
 		else
+		{
 			nextState = driveOnToSwitch;
+		}
 	}
 
 	private void SetMotors(double cmd)
@@ -133,7 +137,9 @@ public class Leadscrew
 	public double GetPosition()
 	{
 		if (encoder.getStopped())
+		{
 			return 0.0;
+		}
 
 		return encoder.getDistance();
 	}

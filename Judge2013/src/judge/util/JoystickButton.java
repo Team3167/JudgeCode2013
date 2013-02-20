@@ -83,7 +83,9 @@ public class JoystickButton
 			}
 			else if (!stick.getRawButton(button) &&
 					!alternateStick.getRawButton(button))
+			{
 				stateRequested = false;
+			}
 
 			return false;
 		}
@@ -97,7 +99,9 @@ public class JoystickButton
 			return true;
 		}
 		else if (!stick.getRawButton(button))
+		{
 			stateRequested = false;
+		}
 
 		return false;
 	}
@@ -113,8 +117,10 @@ public class JoystickButton
     {
 		// Handle two joysticks
 		if (alternateStick != null)
+		{
 			return stick.getRawButton(button) ||
 					alternateStick.getRawButton(button);
+		}
 
 		// Handle single joysticks
 		return stick.getRawButton(button);

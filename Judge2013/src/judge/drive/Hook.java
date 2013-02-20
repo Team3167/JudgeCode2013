@@ -30,9 +30,13 @@ public class Hook
 	public void Update()
 	{
 		if ((release && !left) || (!release && left))
+		{
 			servo.set(releaseCmd);
+		}
 		else
+		{
 			servo.set(holdCmd);
+		}
 	}
 
 	public void Release()
