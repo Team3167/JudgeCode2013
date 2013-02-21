@@ -45,10 +45,7 @@ public class TaskPrepare extends TaskBase
 
 	protected void ProcessState()
 	{
-		leadscrew.Update();
-		boom.Update();
-		leftHook.Update();
-		rightHook.Update();
+		// Nothing here
 	}
 
 	protected boolean IsComplete()

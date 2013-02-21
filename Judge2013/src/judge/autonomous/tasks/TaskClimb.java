@@ -69,8 +69,6 @@ public class TaskClimb extends TaskBase
 			}
 			break;
 		}
-
-		leadscrew.Update();
 	}
 
 	/**

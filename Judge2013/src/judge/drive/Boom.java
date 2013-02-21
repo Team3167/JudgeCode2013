@@ -30,11 +30,10 @@ public class Boom
 
 	public void Update()
 	{
-		motor.set(cmd);
-
-		// TODO:  Add logic to stop extending/retracting when switch engages
-		// and remove this line:
-		cmd = 0.0;
+		if (limit.get() && cmd > 0.0)
+			motor.set(0.0);
+		else
+			motor.set(cmd);
 	}
 
 	public void Extend()
@@ -47,9 +46,13 @@ public class Boom
 		cmd = -speed;
 	}
 
+	public void Stop()
+	{
+		cmd = 0.0;
+	}
+
 	public boolean IsExtended()
 	{
-		// FIXME:  Implement
-		return false;
+		return limit.get();
 	}
 }
