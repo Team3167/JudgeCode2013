@@ -201,6 +201,7 @@ public class Team3167Robot extends IterativeRobot
 			boom.Extend();
 		else if (button6.IsPressed())
 			boom.Retract();
+		boom.Update();
 	}
 
 	// Disabled mode methods ===================================================
