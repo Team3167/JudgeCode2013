@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 import judge.RobotConfiguration;
+import judge.util.Button;
 import judge.util.BangBangController;
 
 /**
@@ -25,7 +26,7 @@ public class Leadscrew
 
 	private Encoder encoder;
 
-	private DigitalInput homeSwitch;
+	private Button homeSwitch;
 
 	private static final byte driveOffOfSwitch = 0;
 	private static final byte driveOnToSwitch = 1;
@@ -56,7 +57,8 @@ public class Leadscrew
 		motor1 = new Jaguar(dsModule, motor1Chan);
 		motor2 = new Jaguar(dsModule, motor2Chan);
 
-		homeSwitch = new DigitalInput(dsModule, homeSwitchChan);
+		final int switchDebounceCycles = 3;
+		homeSwitch = new Button(dsModule, homeSwitchChan, switchDebounceCycles);
 
 		encoder = new Encoder(dsModule, encAChan, dsModule, encBChan);
 		encoder.setDistancePerPulse(RobotConfiguration.leadscrewRatio);
@@ -128,20 +130,21 @@ public class Leadscrew
 	public void Update()
 	{
 		state = nextState;
+		homeSwitch.Update();
 
 		switch (state)
 		{
 		case driveOffOfSwitch:
 			SetMotors(-1.0);
 
-			if (!homeSwitch.get())
+			if (!homeSwitch.Get())
 				nextState = driveOnToSwitch;
 			break;
 
 		case driveOnToSwitch:
 			SetMotors(1.0);
 
-			if (homeSwitch.get())
+			if (homeSwitch.Get())
 				nextState = homedToSwitch;
 			break;
 
@@ -167,7 +170,7 @@ public class Leadscrew
 	 */
 	public final void Reset()
 	{
-		if (homeSwitch.get())
+		if (homeSwitch.Get())
 		{
 			nextState = driveOffOfSwitch;
 		}

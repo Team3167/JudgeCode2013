@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class Boom
 {
 	private double cmd = 0;
-	private double speed = 1.0;
+	private double speed = 0.5;
 	private final Jaguar motor;
 	private final DigitalInput limit;
 

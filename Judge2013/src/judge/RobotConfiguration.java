@@ -17,7 +17,7 @@ package judge;
 public class RobotConfiguration
 {
     // Module slot numbers
-    public static final int digitalSideCarModule = 2;
+    public static final int digitalSideCarModule = 1;
 
 	public static final double frequency = 50.0;
 	public static final double timeStep = 1.0 / frequency;
