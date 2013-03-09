@@ -13,8 +13,11 @@ import judge.util.Button;
 import judge.util.BangBangController;
 
 /**
+ * Leadscrew class.
+ * Represents the robot's leadscrew system, including the drive motors, homing
+ * switch and encoder.
  *
- * @author User
+ * @author KLoux
  */
 public class Leadscrew
 {
@@ -24,6 +27,7 @@ public class Leadscrew
 	private Encoder encoder;
 
 	private Button homeSwitch;
+
 	private BangBangController controller;
 
 	private static final byte driveOffOfSwitch = 0;
@@ -33,62 +37,100 @@ public class Leadscrew
 	private byte state, nextState;
 
 	private double command;
+	private double tolerance = 0.1;// [in]
+	private double reachPosition = 0.0;// [in] w.r.t. "home" position (+ve is hook up)
+	private double pullPosition = -40.0;// [in] w.r.t. "home" position (+ve is hook up)
 
-	public Leadscrew(int dsSlot, int motor1Chan, int motor2Chan, int encAChan,
+	/**
+	 * Constructor for leadscrew class.
+	 *
+	 * @param dsModule			digital sidecar module number
+	 * @param motor1Chan		first motor PWM channel
+	 * @param motor2Chan		second motor PWM channel
+	 * @param encAChan			encoder 'A' channel
+	 * @param encBChan			encoder 'B' channel
+	 * @param homeSwitchChan	homing switch input channel
+	 */
+	public Leadscrew(int dsModule, int motor1Chan, int motor2Chan, int encAChan,
 			int encBChan, int homeSwitchChan)
 	{
-		motor1 = new Jaguar(dsSlot, motor1Chan);
-		motor2 = new Jaguar(dsSlot, motor2Chan);
-
-		homeSwitch = new Button(dsSlot, homeSwitchChan, 3);
+		motor1 = new Jaguar(dsModule, motor1Chan);
+		motor2 = new Jaguar(dsModule, motor2Chan);
 
 		//controller = new BangBangController();
+		final int switchDebounceCycles = 3;
+		homeSwitch = new Button(dsModule, homeSwitchChan, switchDebounceCycles);
 
-		encoder = new Encoder(dsSlot, encAChan, dsSlot, encBChan);
+		encoder = new Encoder(dsModule, encAChan, dsModule, encBChan);
 		encoder.setDistancePerPulse(RobotConfiguration.leadscrewRatio);
 		encoder.setReverseDirection(false);
+
+		controller = new BangBangController(motor1, tolerance, false);
 
 		Reset();
 	}
 
+	/**
+	 * Checks to see if the homing procedure has successfully been executed.
+	 *
+	 * @return true if the homing is complete
+	 */
 	public boolean IsHomed()
 	{
 		return state == ready;
 	}
 
-	// FIXME:  Temporary method - should be replaced by GoToPosition()
-	public void GoUp()
+	/**
+	 * Command the hook to the top position.
+	 */
+	public void GoToReachPosition()
 	{
-		command = 1.0;
+		SetPosition(reachPosition);
 	}
 
-	// FIXME:  Temporary method - should be replaced by GoToPosition()
-	public void GoDown()
+	/**
+	 * Command the hook to the bottom position.
+	 */
+	public void GoToPullPosition()
 	{
-		command = -1.0;
+		SetPosition(pullPosition);
 	}
 
-	// FIXME:  Temporary method - should be replaced by GoToPosition()
-	public void Park()
+	/**
+	 * Sets the command equal to the current position.
+	 */
+	public void Stop()
 	{
-		command = 0.0;
+		SetPosition(GetPosition());
 	}
 
+	/**
+	 * Sets the position command to the specified (arbitrary) value.
+	 *
+	 * @param position desired position in inches
+	 */
 	public void SetPosition(double position)
 	{
-		// FIXME:  Implement
+		command = position;
 	}
 
+	/**
+	 * Checks to see if current position is close to commanded position.
+	 *
+	 * @return true if position is within tolerance
+	 */
 	public boolean AtPosition()
 	{
-		// FIXME:  Implement
-		return false;
+		return Math.abs(GetPosition() - command) < tolerance;
 	}
 
+	/**
+	 * State manager and command processor.
+	 * To be called from robot's periodic method.
+	 */
 	public void Update()
 	{
 		state = nextState;
-		System.out.println("switch state: " + homeSwitch.Get());
 		homeSwitch.Update();
 
 		switch (state)
@@ -111,37 +153,53 @@ public class Leadscrew
 			SetMotors(0.0);
 			encoder.reset();
 			encoder.start();
+			Stop();
 			nextState = ready;
 			break;
 
 		case ready:
-			SetMotors(command);
+			controller.DoControl(command, GetPosition());
+			motor2.set(motor1.get());// Make motor2 always match motor1 command
 			break;
 
 		default:
-
 		}
 	}
 
+	/**
+	 * Resets homing (requires homing procedure to be executed again).
+	 */
 	public final void Reset()
 	{
 		if (homeSwitch.Get())
+		{
 			nextState = driveOffOfSwitch;
+		}
 		else
+		{
 			nextState = driveOnToSwitch;
+		}
 	}
 
+	/**
+	 * Directly specify motor speed.
+	 *
+	 * @param cmd	speed command to issue to the jaguars.
+	 */
 	private void SetMotors(double cmd)
 	{
 		motor1.set(-cmd);
 		motor2.set(-cmd);
 	}
 
+	/**
+	 * Gets the leadscrew position.
+	 * Only returns valid data if IsHomed() returns true.
+	 *
+	 * @return current leadscrew position in inches as reported by the encoder
+	 */
 	public double GetPosition()
 	{
-		/*if (encoder.getStopped())
-			return 0.0;*/
-
 		return encoder.getDistance();
 	}
 }

@@ -64,11 +64,11 @@ public class TaskClimb extends TaskBase
 			break;
 		case statePulling:
 			if (leadscrew.AtPosition() && level != 3)
+			{
 				SetNextState(stateReach);
+			}
 			break;
 		}
-
-		leadscrew.Update();
 	}
 
 	/**
@@ -78,7 +78,9 @@ public class TaskClimb extends TaskBase
 	protected boolean IsComplete()
 	{
 		if (GetState() == statePulling && level == 3 && leadscrew.AtPosition())
+		{
 			return true;
+		}
 
 		return false;
 	}

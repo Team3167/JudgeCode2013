@@ -1,0 +1,25 @@
+Father Judge FRC Java Coding Standards
+--------------------------------------
+Created: 2/20/2013
+
+Tabs/spaces:
+Always use tabs for aligning text.  Purpose is to allow users to set the tab width in their own editors without changing document text.
+
+Function definitions and calls:
+No spaces between function name and parentheses.  Should look like this:
+private void MyFunction(double argument1, ....)
+
+and similarly:
+result = MyFunction(argument1, argument2, ...);
+
+Braces:
+Always put braces on a line of their own.
+Always use braces, even for single-line if..else statements.
+Align braces with start of parent text, for example:
+void MyFunction()
+{
+	if (something)
+	{
+		// more stuff here
+	}
+}

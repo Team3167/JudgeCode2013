@@ -39,14 +39,18 @@ public class TaskQueue
         {
             TaskBase tempArray[] = new TaskBase[taskCount];
             for (i = 0; i < taskCount; i++)
+			{
                 tempArray[i] = pendingTasks[i];
+			}
 
             // Resize the current list
             pendingTasks = new TaskBase[taskCount + 1];
 
             // Repopulate the list
             for (i = 0; i < taskCount; i++)
+			{
                 pendingTasks[i] = tempArray[i];
+			}
         }
         else
         {
@@ -72,7 +76,9 @@ public class TaskQueue
 	{
         // If we don't have any tasks, this isn't really a valid call
         if (taskCount <= 0)
+		{
 			throw new EmptyStackException();
+		}
 
         // Store the next task temporarily
         TaskBase nextTask = pendingTasks[0];
@@ -81,17 +87,21 @@ public class TaskQueue
         TaskBase tempArray[] = new TaskBase[taskCount - 1];
         int i;
         for (i = 1; i < taskCount; i++)
+		{
             tempArray[i - 1] = pendingTasks[i];
+		}
 
         // Decrement the array size
         taskCount--;
-        
+
         // Resize the current list
         pendingTasks = new TaskBase[taskCount];
-        
+
         // Repopulate the list
         for (i = 0; i < taskCount; i++)
+		{
             pendingTasks[i] = tempArray[i];
+		}
 
         return nextTask;
 	}

@@ -42,12 +42,10 @@ public class Team3167Robot extends IterativeRobot
 	// Fields
 	private TaskManager taskManager;
 
-	// HID objects
 	private Joystick stick;
 
 	private Jaguar driveMotor1;
 	private Jaguar driveMotor2;
-
 	private RobotDrive drive;
 
 	private JoystickButton button3;
@@ -59,14 +57,11 @@ public class Team3167Robot extends IterativeRobot
 	private Boom boom;
 	private Hook leftHook;
 	private Hook rightHook;
-
 	//private AxisCamera camera = AxisCamera.getInstance();
 
 	// For displaying information on the driver's station message window
 	private final DriverStationLCD msg = DriverStationLCD.getInstance();
 	private Timer timer;
-	private float matchTime;
-	private DSPlotDataBuffer dsBuffer;
 
 	// Robot initialization method =============================================
 	/**
@@ -75,9 +70,9 @@ public class Team3167Robot extends IterativeRobot
 	public void robotInit()
 	{
 		driveMotor1 = new Jaguar(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.leftMotorChannel);
+								RobotConfiguration.leftMotorChannel);
 		driveMotor2 = new Jaguar(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.rightMotorChannel);
+								RobotConfiguration.rightMotorChannel);
 		stick = new Joystick(1);
 		drive = new RobotDrive(driveMotor1, driveMotor2);
 
@@ -87,25 +82,22 @@ public class Team3167Robot extends IterativeRobot
 		button6 = new JoystickButton(stick, 6);
 
 		leadscrew = new Leadscrew(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.leadscrewMotor1Channel,
-				RobotConfiguration.leadscrewMotor2Channel,
-				RobotConfiguration.leadscrewEncoderAChannel,
-				RobotConfiguration.leadscrewEncoderBChannel,
-				RobotConfiguration.leadscrewHomeSwitchChannel);
+								RobotConfiguration.leadscrewMotor1Channel,
+								RobotConfiguration.leadscrewMotor2Channel,
+								RobotConfiguration.leadscrewEncoderAChannel,
+								RobotConfiguration.leadscrewEncoderBChannel,
+								RobotConfiguration.leadscrewHomeSwitchChannel);
 
 		boom = new Boom(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.boomMotorChannel, 6);// FIXME: put real channel in
+						RobotConfiguration.boomMotorChannel,
+						RobotConfiguration.boomSwitchChannel);
 		leftHook = new Hook(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.leftHookChannel, true);
+							RobotConfiguration.leftHookChannel, true);
 		rightHook = new Hook(RobotConfiguration.digitalSideCarModule,
-				RobotConfiguration.rightHookChannel, false);
+							RobotConfiguration.rightHookChannel, false);
 
 		// Create the joystick
 		stick = new Joystick(0);
-
-		// Create the buffer for sending data to the dashboard
-		dsBuffer = new DSPlotDataBuffer();
-
 
 		// Create the task manager object
 		taskManager = new TaskManager();
@@ -115,16 +107,24 @@ public class Team3167Robot extends IterativeRobot
 		timer = new Timer();
 		timer.schedule(new TimerTask()
 		{
-		public void run()
-		{
-			UpdateLCD();
-		}
+			public void run()
+			{
+				UpdateLCD();
+			}
 		}, 0, 500);// 0 - no delay (start right now), 500 - period (in msec)
 
 		// Print to the console to tell us that we're ready to rock and roll
 		// Useful when debugging and we don't want to wait longer than necessary
 		// to make sure the robot is ready
 		System.out.println("Robot is ready to rock and roll!");
+	}
+
+	private void ExectueCommonRoutines()
+	{
+		leadscrew.Update();
+		boom.Update();
+		leftHook.Update();
+		rightHook.Update();
 	}
 
 	// Autonomous mode methods =================================================
@@ -155,6 +155,7 @@ public class Team3167Robot extends IterativeRobot
 	public void autonomousPeriodic()
 	{
 		taskManager.DoCurrentTask();
+		ExectueCommonRoutines();
 	}
 
 	// Teleoperated mode methods ===============================================
@@ -183,25 +184,47 @@ public class Team3167Robot extends IterativeRobot
 		// Move the 'bot according to the joystick position, but only if we have
 		// no tasks to do
 		if (taskManager.OkToDrive())
-			drive.arcadeDrive(stick);
-
-		if (leadscrew.IsHomed())
 		{
-			if (button3.IsPressed())
-				leadscrew.GoUp();
-			else if (button5.IsPressed())
-				leadscrew.GoDown();
-			else
-				leadscrew.Park();
+			drive.arcadeDrive(stick);//Didn't we want to step down the drive so that we
+									// don't wheelie. [RY]
+									// YES -> you can do this with a SecondOrderLimiter
+									// and the version of arcadeDrive() that takes two doubles. [KRL]
 		}
-		leadscrew.Update();
-		System.out.println("Position: " + leadscrew.GetPosition());
 
-		if (button4.IsPressed())
-			boom.Extend();
-		else if (button6.IsPressed())
-			boom.Retract();
-		boom.Update();
+		if (!taskManager.PerformingTask())
+		{
+			if (leadscrew.IsHomed())
+			{
+				if (button3.IsPressed())
+				{
+					leadscrew.GoToReachPosition();
+				}
+				else if (button5.IsPressed())
+				{
+					leadscrew.GoToPullPosition();
+				}
+				else
+				{
+					leadscrew.Stop();
+				}
+			}
+			//System.out.println("Position: " + leadscrew.GetPosition());
+
+			if (button4.IsPressed())
+			{
+				boom.Extend();
+			}
+			else if (button6.IsPressed())
+			{
+				boom.Retract();
+			}
+			else
+			{
+				boom.Stop();
+			}
+		}
+
+		ExectueCommonRoutines();
 	}
 
 	// Disabled mode methods ===================================================
@@ -212,9 +235,19 @@ public class Team3167Robot extends IterativeRobot
 	public void disabledInit()
 	{
 		// We should probably clear any left-over tasks, so we don't have
-		// competing logic inputs
+		// competing logic inputs [RY]
+		// Good thought, but we might find that the robot can climb on it's own
+		// and we don't need user input.  If that's the case, I would recommend
+		// just having a button (trigger?) perform "clear tasks" so the user can
+		// take over in the event of an emergency, but under normal circumstances,
+		// we let it go.  Let's leave this for now, though [KRL]
 		taskManager.ClearAllTasks();
-		leadscrew.Reset();
+
+		// I'm guessing (hoping) that resetting between autonomous
+		// and teleoperated isn't required.  Currently, I believe the robot
+		// momentarily enters a disabled state in between autonomous and
+		// teleoperatoed.
+		//leadscrew.Reset();
 	}
 
 	/**
@@ -245,15 +278,15 @@ public class Team3167Robot extends IterativeRobot
 		// expected
 		if (isAutonomous() && !isDisabled())
 		{
-		UpdateAutonomousLCD();
+			UpdateAutonomousLCD();
 		}
 		else if (isOperatorControl() && !isDisabled())
 		{
-		UpdateTeleoperatedLCD();
+			UpdateTeleoperatedLCD();
 		}
 		else// Disabled
 		{
-		UpdateDisabledLCD();
+			UpdateDisabledLCD();
 		}
 
 		// Send the changes to the driver's station
@@ -271,7 +304,7 @@ public class Team3167Robot extends IterativeRobot
 		msg.println(DriverStationLCD.Line.kMain6, 1, "     AUTONOMOUS      ");
 		msg.println(DriverStationLCD.Line.kUser2, 1,
 					//GetAutonomousProfileName(autonomousProfile));
-				"                     ");
+					"                     ");
 		msg.println(DriverStationLCD.Line.kUser3, 1, "                     ");
 		msg.println(DriverStationLCD.Line.kUser4, 1, "TASK:                ");
 		msg.println(DriverStationLCD.Line.kUser5, 1,
@@ -303,7 +336,7 @@ public class Team3167Robot extends IterativeRobot
 		msg.println(DriverStationLCD.Line.kUser3, 1, "AUTONOMOUS PROFILE:  ");
 		msg.println(DriverStationLCD.Line.kUser4, 1,
 					//GetAutonomousProfileName(autonomousProfile));
-				"                     ");
+					"                     ");
 		msg.println(DriverStationLCD.Line.kUser5, 1, "                     ");
 		msg.println(DriverStationLCD.Line.kUser6, 1, "                     ");
 	}

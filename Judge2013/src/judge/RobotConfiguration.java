@@ -41,6 +41,7 @@ public class RobotConfiguration
 	public static final int leadscrewEncoderAChannel = 1;
 	public static final int leadscrewEncoderBChannel = 2;
 	public static final int leadscrewHomeSwitchChannel = 3;
+	public static final int boomSwitchChannel = 4;
 
 	/***************************************************************************
 	 *                   Hardware Information and Constants

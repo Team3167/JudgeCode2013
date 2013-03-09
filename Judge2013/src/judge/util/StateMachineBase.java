@@ -76,7 +76,7 @@ public abstract class StateMachineBase
 
 	/**
 	 * Sets the next state for the state machine (takes effect on next call of
-	 * Proces()).
+	 * Process()).
 	 *
 	 * @param _nextState Machine's next state
 	 */
