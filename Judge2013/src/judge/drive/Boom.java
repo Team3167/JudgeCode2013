@@ -30,10 +30,7 @@ public class Boom
 
 	public void Update()
 	{
-		if (limit.get() && cmd > 0.0)
-			motor.set(0.0);
-		else
-			motor.set(cmd);
+	  motor.set(cmd);
 	}
 
 	public void Extend()
@@ -48,8 +45,8 @@ public class Boom
 
 	public void Stop()
 	{
-		cmd = 0.0;
-	}
+        cmd = 0.0;
+    }
 
 	public boolean IsExtended()
 	{

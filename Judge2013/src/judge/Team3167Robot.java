@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.Dashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 
+import edu.wpi.first.wpilibj.camera.AxisCamera;
+
 // Standard Java imports
 import java.util.Timer;
 import java.util.TimerTask;
@@ -47,11 +49,15 @@ public class Team3167Robot extends IterativeRobot
 	private Jaguar driveMotor1;
 	private Jaguar driveMotor2;
 	private RobotDrive drive;
+    
+    private double xCommand;
+    private double yCommand;
 
 	private JoystickButton button3;
 	private JoystickButton button4;
 	private JoystickButton button5;
 	private JoystickButton button6;
+    private JoystickButton trigger;
 
 	private Leadscrew leadscrew;
 	private Boom boom;
@@ -62,6 +68,7 @@ public class Team3167Robot extends IterativeRobot
 	// For displaying information on the driver's station message window
 	private final DriverStationLCD msg = DriverStationLCD.getInstance();
 	private Timer timer;
+    private AxisCamera camera = AxisCamera.getInstance();
 
 	// Robot initialization method =============================================
 	/**
@@ -80,6 +87,7 @@ public class Team3167Robot extends IterativeRobot
 		button4 = new JoystickButton(stick, 4);
 		button5 = new JoystickButton(stick, 5);
 		button6 = new JoystickButton(stick, 6);
+        trigger = new JoystickButton(stick, 1);
 
 		leadscrew = new Leadscrew(RobotConfiguration.digitalSideCarModule,
 								RobotConfiguration.leadscrewMotor1Channel,
@@ -97,7 +105,7 @@ public class Team3167Robot extends IterativeRobot
 							RobotConfiguration.rightHookChannel, false);
 
 		// Create the joystick
-		stick = new Joystick(0);
+		//stick = new Joystick(0);
 
 		// Create the task manager object
 		taskManager = new TaskManager();
@@ -130,14 +138,14 @@ public class Team3167Robot extends IterativeRobot
 	// Autonomous mode methods =================================================
 	/**
 	* Initialization method for autonomous mode. Called once when mode is first
-	* set to autonomous.
+	* b to autonomous.
 	*/
 	public void autonomousInit()
 	{
 		// Clear out any tasks from a previous practice/test
 		taskManager.ClearAllTasks();
 		taskManager.AddTask(new TaskPrepare(leadscrew, boom, leftHook, rightHook));
-		taskManager.AddTask(new TaskClimb(leadscrew));
+	//	taskManager.AddTask(new TaskClimb(leadscrew));
 	}
 
 	/**
@@ -185,7 +193,10 @@ public class Team3167Robot extends IterativeRobot
 		// no tasks to do
 		if (taskManager.OkToDrive())
 		{
-			drive.arcadeDrive(stick);//Didn't we want to step down the drive so that we
+            //xCommand = stick.getX() * .75;
+            //yCommand = stick.getY() * .75;
+			drive.arcadeDrive(stick);
+                                    //Didn't we want to step down the drive so that we
 									// don't wheelie. [RY]
 									// YES -> you can do this with a SecondOrderLimiter
 									// and the version of arcadeDrive() that takes two doubles. [KRL]
@@ -193,8 +204,8 @@ public class Team3167Robot extends IterativeRobot
 
 		if (!taskManager.PerformingTask())
 		{
-			if (leadscrew.IsHomed())
-			{
+			//if (leadscrew.IsHomed())
+			//{
 				if (button3.IsPressed())
 				{
 					leadscrew.GoToReachPosition();
@@ -207,7 +218,13 @@ public class Team3167Robot extends IterativeRobot
 				{
 					leadscrew.Stop();
 				}
-			}
+                
+                if(trigger.HasJustBeenPressed())
+                {
+                    leftHook.Release();
+                    rightHook.Release();
+                }
+			//}
 			//System.out.println("Position: " + leadscrew.GetPosition());
 
 			if (button4.IsPressed())

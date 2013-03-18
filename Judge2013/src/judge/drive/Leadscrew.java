@@ -26,7 +26,7 @@ public class Leadscrew
 
 	private Encoder encoder;
 
-	private Button homeSwitch;
+	//private Button homeSwitch;
 
 	private BangBangController controller;
 
@@ -40,6 +40,7 @@ public class Leadscrew
 	private double tolerance = 0.1;// [in]
 	private double reachPosition = 0.0;// [in] w.r.t. "home" position (+ve is hook up)
 	private double pullPosition = -40.0;// [in] w.r.t. "home" position (+ve is hook up)
+    private double speedCmd = 0;
 
 	/**
 	 * Constructor for leadscrew class.
@@ -59,7 +60,7 @@ public class Leadscrew
 
 		//controller = new BangBangController();
 		final int switchDebounceCycles = 3;
-		homeSwitch = new Button(dsModule, homeSwitchChan, switchDebounceCycles);
+		//homeSwitch = new Button(dsModule, homeSwitchChan, switchDebounceCycles);
 
 		encoder = new Encoder(dsModule, encAChan, dsModule, encBChan);
 		encoder.setDistancePerPulse(RobotConfiguration.leadscrewRatio);
@@ -85,7 +86,7 @@ public class Leadscrew
 	 */
 	public void GoToReachPosition()
 	{
-		SetPosition(reachPosition);
+		speedCmd = 1.0;
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class Leadscrew
 	 */
 	public void GoToPullPosition()
 	{
-		SetPosition(pullPosition);
+		speedCmd = -1.0;
 	}
 
 	/**
@@ -101,7 +102,7 @@ public class Leadscrew
 	 */
 	public void Stop()
 	{
-		SetPosition(GetPosition());
+		speedCmd = 0.0;
 	}
 
 	/**
@@ -130,7 +131,7 @@ public class Leadscrew
 	 */
 	public void Update()
 	{
-		state = nextState;
+		/*state = nextState;
 		homeSwitch.Update();
 
 		switch (state)
@@ -163,7 +164,9 @@ public class Leadscrew
 			break;
 
 		default:
-		}
+		}*/
+        
+        SetMotors(speedCmd);
 	}
 
 	/**
@@ -171,7 +174,7 @@ public class Leadscrew
 	 */
 	public final void Reset()
 	{
-		if (homeSwitch.Get())
+		if (false) //homeSwitch.Get())
 		{
 			nextState = driveOffOfSwitch;
 		}

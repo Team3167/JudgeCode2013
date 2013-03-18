@@ -38,9 +38,9 @@ public class TaskPrepare extends TaskBase
 
 		// Tell leadscrew to home
 		// Tell boom to extend
-		boom.Extend();
-		leftHook.Release();
-		rightHook.Release();
+		//boom.Extend();
+		//leftHook.Release();
+		//rightHook.Release();
 	}
 
 	protected void ProcessState()
